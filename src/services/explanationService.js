@@ -144,42 +144,21 @@ async function geminiExplanation(profile, scholarship, checks, status, lang) {
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/` +
     `${settings.GEMINI_MODEL}:generateContent`;
-  const requestOptions = {
+  // Keep detail pages responsive: make one bounded request. If Gemini is
+  // temporarily unavailable, return the grounded template immediately.
+  const response = await fetch(url, {
     method: "POST",
     headers: {
       "x-goog-api-key": settings.GEMINI_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-  };
-
-  // Gemini can return 503 during temporary capacity spikes. Retry transient
-  // server/rate-limit responses with short exponential backoff.
-  const retryableStatuses = new Set([429, 500, 502, 503, 504]);
-  const maxAttempts = 3;
-  let response;
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      response = await fetch(url, {
-        ...requestOptions,
-        signal: AbortSignal.timeout(
-          Math.max(settings.GEMINI_TIMEOUT_SECONDS, 10) * 1000
-        ),
-      });
-    } catch (error) {
-      if (attempt === maxAttempts) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      continue;
-    }
-    if (response.ok || !retryableStatuses.has(response.status) || attempt === maxAttempts) {
-      break;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-  }
-  if (!response || !response.ok) {
-    const detail = response ? await response.text().catch(() => "") : "";
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
     throw new Error(
-      `Gemini request failed with HTTP ${response ? response.status : "unknown"}` +
+      `Gemini request failed with HTTP ${response.status}` +
       (detail ? `: ${detail.slice(0, 300)}` : "")
     );
   }
