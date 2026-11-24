@@ -16,7 +16,7 @@
         <p data-i18n="tagline">Find scholarships that match your profile</p>
       </div>
     </div>
-    <button id="langToggle" class="btn btn-ghost" type="button">বাংলা</button>
+    <div class="header-actions"><button id="tutorialBtn" class="btn btn-ghost" type="button">▶ Tutorial</button><button id="langToggle" class="btn btn-ghost" type="button">বাংলা</button></div>
   </div>
 </header>
 
@@ -137,6 +137,20 @@
     <div id="detailContent"></div>
   </section>
 
+
+  <div id="tutorialOverlay" class="tutorial-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+    <div class="tutorial-dialog">
+      <div class="tutorial-head"><div><span class="tutorial-kicker">QUICK START GUIDE</span><h2 id="tutorialTitle">How to use ScholarSync AI</h2></div><button id="tutorialClose" class="tutorial-close" type="button" aria-label="Close tutorial">✕</button></div>
+      <div class="tutorial-steps">
+        <section class="tutorial-step"><span>01</span><div><h3>Enter your CGPA</h3><p>Type your CGPA out of 4.00. You can also use one of the quick-select buttons.</p></div></section>
+        <section class="tutorial-step"><span>02</span><div><h3>Select your department</h3><p>Choose the department that matches your current study program.</p></div></section>
+        <section class="tutorial-step"><span>03</span><div><h3>Answer the profile questions</h3><p>Tell us whether you need financial support. Gender is optional and can be left unspecified.</p></div></section>
+        <section class="tutorial-step"><span>04</span><div><h3>Explore your matches</h3><p>We check every record in the supplied dataset. Open details to review eligibility checks, deadlines and application guidance.</p></div></section>
+      </div>
+      <p class="tutorial-note">Eligibility is decided by verified rules—not by AI. AI only helps explain your results.</p>
+      <button id="tutorialGotIt" class="btn btn-primary btn-block" type="button">Got it — let's start</button>
+    </div>
+  </div>
   <div id="loadingOverlay" class="loading-overlay" hidden>
     <div class="spinner" aria-hidden="true"></div>
     <p data-i18n="loading">Checking every scholarship…</p>
