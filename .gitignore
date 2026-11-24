@@ -1,4 +1,8 @@
-# Python
+# Node
+node_modules/
+npm-debug.log*
+
+# Python (backend/ prototype)
 __pycache__/
 *.py[cod]
 .venv/

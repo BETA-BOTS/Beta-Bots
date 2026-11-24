@@ -52,25 +52,27 @@ Beginner AI Hackathon 2026 · PCIU Computer Club
 
 | Layer | Choice |
 |---|---|
-| Backend | Python 3.12, FastAPI, Pydantic, Uvicorn |
-| Frontend | Static HTML/CSS/JavaScript served by FastAPI (no build step, no CDN dependencies) |
-| Data | Organizer-provided CSV (`backend/app/data/scholarships.csv`, 136 records), loaded in memory with the Python `csv` module |
+| Backend | Node.js, Express |
+| Frontend | Static HTML/CSS/JavaScript served by Express from `public/` (no build step, no CDN dependencies) |
+| Data | Organizer-provided CSV (`data/scholarships.csv`, 136 records), loaded in memory at startup with `csv-parse` |
 | AI | Google Gemini API (explanations only, behind a service wrapper) with a deterministic template fallback |
-| Tests | pytest + FastAPI TestClient |
+| Tests | Node's built-in `node:test` runner |
+
+> An earlier Python/FastAPI prototype of the same app is kept in
+> `backend/` for reference. The Node/Express app at the repository root
+> is the main, deployed application; both implement identical matching
+> behaviour against the same dataset.
 
 ## Setup and run
 
 ```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+npm install
 
 # Optional: enable AI explanations (the app works without a key)
 cp .env.example .env             # then put your key in .env
-export GEMINI_API_KEY=<your-key> # or load it from .env in your shell
+export GEMINI_API_KEY=<your-key> # or set it in your shell / host settings
 
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+npm start
 ```
 
 Open **http://localhost:8000** in a browser.
@@ -78,8 +80,7 @@ Open **http://localhost:8000** in a browser.
 Run the tests:
 
 ```bash
-cd backend
-pytest
+npm test
 ```
 
 ## API
