@@ -144,17 +144,44 @@ async function geminiExplanation(profile, scholarship, checks, status, lang) {
   const url =
     `https://generativelanguage.googleapis.com/v1beta/models/` +
     `${settings.GEMINI_MODEL}:generateContent`;
-  const response = await fetch(url, {
+  const requestOptions = {
     method: "POST",
     headers: {
       "x-goog-api-key": settings.GEMINI_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(settings.GEMINI_TIMEOUT_SECONDS * 1000),
-  });
-  if (!response.ok) {
-    throw new Error(`Gemini request failed with HTTP ${response.status}`);
+  };
+
+  // Gemini can return 503 during temporary capacity spikes. Retry transient
+  // server/rate-limit responses with short exponential backoff.
+  const retryableStatuses = new Set([429, 500, 502, 503, 504]);
+  const maxAttempts = 3;
+  let response;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      response = await fetch(url, {
+        ...requestOptions,
+        signal: AbortSignal.timeout(
+          Math.max(settings.GEMINI_TIMEOUT_SECONDS, 10) * 1000
+        ),
+      });
+    } catch (error) {
+      if (attempt === maxAttempts) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      continue;
+    }
+    if (response.ok || !retryableStatuses.has(response.status) || attempt === maxAttempts) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+  }
+  if (!response || !response.ok) {
+    const detail = response ? await response.text().catch(() => "") : "";
+    throw new Error(
+      `Gemini request failed with HTTP ${response ? response.status : "unknown"}` +
+      (detail ? `: ${detail.slice(0, 300)}` : "")
+    );
   }
   const data = await response.json();
   const text = data.candidates[0].content.parts[0].text;
@@ -186,7 +213,9 @@ async function explain(profile, scholarship, checks, status, missing = [], lang 
   if (result === null) {
     result = templateExplanation(profile, scholarship, checks, status, missing, lang);
   }
-  cache.set(key, result);
+  // Cache successful Gemini explanations only. A temporary API outage
+  // must not permanently pin this profile to a template response.
+  if (result.source === "gemini") cache.set(key, result);
   return result;
 }
 
