@@ -231,15 +231,33 @@ async function openDetail(id) {
   });
   $("loadingOverlay").hidden = false;
   try {
-    const res = await fetch(`/api/scholarships/${encodeURIComponent(id)}?${q}`);
+    const detailUrl = `/api/scholarships/${encodeURIComponent(id)}?${q}`;
+    const res = await fetch(detailUrl);
     if (!res.ok) throw new Error("detail failed");
     renderDetail(await res.json());
     showView("detail");
+    $("loadingOverlay").hidden = true;
+
+    // Load AI after the details are visible; Gemini latency cannot block navigation.
+    fetch(`${detailUrl}&explain=ai`)
+      .then((aiRes) => { if (!aiRes.ok) throw new Error("AI unavailable"); return aiRes.json(); })
+      .then((data) => updateDetailExplanation(data.ai_explanation))
+      .catch(() => updateDetailExplanation(null));
   } catch (e) {
     alert(t("errGeneric"));
   } finally {
     $("loadingOverlay").hidden = true;
   }
+}
+
+function updateDetailExplanation(ex) {
+  const box = $("detailAiBox");
+  if (!box) return;
+  if (!ex) {
+    box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · Template</span><p>AI explanation is temporarily unavailable. The verified template explanation is shown.</p>`;
+    return;
+  }
+  box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "AI" : "Template")}</span><p>${escapeHtml(ex.summary || "")}</p><p><em>${escapeHtml(ex.disclaimer || "")}</em></p>`;
 }
 
 function critName(c) {
@@ -278,8 +296,8 @@ function renderDetail(d) {
       <tr><th>${escapeHtml(t("colCriterion"))}</th><th>${escapeHtml(t("colStatus"))}</th><th>${escapeHtml(t("colYours"))}</th><th>${escapeHtml(t("colRequired"))}</th><th>${escapeHtml(t("colDetail"))}</th></tr>
       ${checks}
     </table></div>` : ""}
-    <div class="ai-box">
-      <span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "AI" : "Template")}</span>
+    <div class="ai-box" id="detailAiBox">
+      <span class="ai-label">${escapeHtml(t("aiWhy"))} · Template · AI loading…</span>
       <p>${escapeHtml(ex.summary || "")}</p>
       <p><em>${escapeHtml(ex.disclaimer || "")}</em></p>
     </div>
