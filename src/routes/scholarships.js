@@ -87,14 +87,28 @@ router.get("/api/scholarships/:id", async (req, res, next) => {
       const result = evaluate(profile, scholarship);
       payload.checks = result.checks.map(checkToDict);
       payload.status = result.status;
-      payload.ai_explanation = await explanationService.explain(
-        profile,
-        scholarship,
-        result.checks,
-        result.status,
-        [],
-        profile.lang
-      );
+      // Return the scholarship details immediately. The browser requests
+      // the optional AI explanation separately so a slow Gemini response
+      // never blocks the page itself.
+      if (q.explain === "ai") {
+        payload.ai_explanation = await explanationService.explain(
+          profile,
+          scholarship,
+          result.checks,
+          result.status,
+          [],
+          profile.lang
+        );
+      } else {
+        payload.ai_explanation = explanationService.templateExplanation(
+          profile,
+          scholarship,
+          result.checks,
+          result.status,
+          [],
+          profile.lang
+        );
+      }
     }
     res.json(payload);
   } catch (err) {
