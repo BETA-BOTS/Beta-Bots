@@ -136,6 +136,15 @@ async function loadMeta() {
   } catch (e) { /* form still usable; backend error surfaces on submit */ }
 }
 
+async function showLoadingOverlay() {
+  const overlay = $("loadingOverlay");
+  overlay.hidden = false;
+  // Let the browser paint the overlay before starting a network request.
+  await new Promise((resolve) => requestAnimationFrame(() =>
+    requestAnimationFrame(resolve)
+  ));
+}
+
 /* ---------------- matching ---------------- */
 function setError(id, message) {
   const el = $(id);
@@ -152,7 +161,7 @@ async function runMatch(sortBy) {
     lang,
     sort_by: sortBy || $("sortBy").value,
   };
-  $("loadingOverlay").hidden = false;
+  await showLoadingOverlay();
   try {
     const res = await fetch("/api/match", {
       method: "POST",
@@ -229,7 +238,7 @@ async function openDetail(id) {
     financial_support_needed: p.financial_support_needed,
     gender: p.gender, lang,
   });
-  $("loadingOverlay").hidden = false;
+  await showLoadingOverlay();
   try {
     const detailUrl = `/api/scholarships/${encodeURIComponent(id)}?${q}`;
     const res = await fetch(detailUrl);
