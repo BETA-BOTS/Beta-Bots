@@ -159,7 +159,7 @@ async function geminiExplanation(profile, scholarship, checks, status, lang) {
     });
     if (response.ok) break;
     const detail = await response.text().catch(() => "");
-    const retryable = [429, 500, 502, 503, 504].includes(response.status);
+    const retryable = [500, 502, 503, 504].includes(response.status);
     if (attempt === 0 && retryable) {
       await new Promise((resolve) => setTimeout(resolve, 900));
       continue;
