@@ -237,6 +237,17 @@ function renderResults() {
 }
 
 
+function friendlyGeminiError(reason) {
+  const message = String(reason || "");
+  if (/HTTP 429|quota|rate.?limit|exceeded.*quota/i.test(message)) {
+    return "Gemini API quota has been reached for the current plan. Check your Google AI Studio usage and quota, enable billing or wait for the quota to reset. Scholarship matching and eligibility checks are still working; this explanation is using the verified template.";
+  }
+  if (/HTTP 503|overloaded|unavailable/i.test(message)) {
+    return "Gemini is temporarily unavailable or overloaded. Please try again later. Your scholarship eligibility results are unaffected.";
+  }
+  return "Gemini could not generate an explanation right now. Please check the API key, selected model and API quota. Your eligibility results are unaffected.";
+}
+
 async function explainCardWithAI(id, button) {
   const box = $("cardAi-" + id);
   button.disabled = true;
@@ -250,7 +261,7 @@ async function explainCardWithAI(id, button) {
     const data = await res.json();
     const ex = data.ai_explanation || {};
     const label = ex.source === "gemini" ? "✦ GEMINI AI" : "TEMPLATE FALLBACK";
-    const reason = ex.fallback_reason ? '<p class="ai-fallback-note">' + escapeHtml(ex.fallback_reason) + '</p>' : "";
+    const reason = ex.fallback_reason ? '<p class="ai-fallback-note">' + escapeHtml(friendlyGeminiError(ex.fallback_reason)) + '</p>' : "";
     box.innerHTML = '<span class="ai-label">' + label + '</span><p>' + escapeHtml(ex.summary || "") + '</p><p><em>' + escapeHtml(ex.disclaimer || "") + '</em></p>' + reason;
     button.textContent = ex.source === "gemini" ? "✓ AI explanation ready" : "↻ Try AI again";
   } catch (err) {
@@ -295,7 +306,7 @@ function updateDetailExplanation(ex) {
     box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · Template fallback</span><p>Gemini is temporarily unavailable. The verified template explanation is shown.</p>`;
     return;
   }
-  const reason = ex.fallback_reason ? `<p class="ai-fallback-note">${escapeHtml(ex.fallback_reason)}</p>` : "";
+  const reason = ex.fallback_reason ? `<p class="ai-fallback-note">${escapeHtml(friendlyGeminiError(ex.fallback_reason))}</p>` : "";
   box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "Gemini AI" : "Template fallback")}</span><p>${escapeHtml(ex.summary || "")}</p><p><em>${escapeHtml(ex.disclaimer || "")}</em></p>${reason}`;
 }
 
