@@ -289,10 +289,11 @@ function updateDetailExplanation(ex) {
   const box = $("detailAiBox");
   if (!box) return;
   if (!ex) {
-    box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · Template</span><p>AI explanation is temporarily unavailable. The verified template explanation is shown.</p>`;
+    box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · Template fallback</span><p>Gemini is temporarily unavailable. The verified template explanation is shown.</p>`;
     return;
   }
-  box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "AI" : "Template")}</span><p>${escapeHtml(ex.summary || "")}</p><p><em>${escapeHtml(ex.disclaimer || "")}</em></p>`;
+  const reason = ex.fallback_reason ? `<p class="ai-fallback-note">${escapeHtml(ex.fallback_reason)}</p>` : "";
+  box.innerHTML = `<span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "Gemini AI" : "Template fallback")}</span><p>${escapeHtml(ex.summary || "")}</p><p><em>${escapeHtml(ex.disclaimer || "")}</em></p>${reason}`;
 }
 
 function critName(c) {
