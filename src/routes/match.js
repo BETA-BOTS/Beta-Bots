@@ -18,7 +18,7 @@ function cmpDeadline(a, b) {
   const da = a.scholarship.deadline;
   const db = b.scholarship.deadline;
   if (da === null && db === null) return cmpName(a, b);
-  if (da === null) return 1; // missing dates last
+  if (da === null) return 1;
   if (db === null) return -1;
   if (da !== db) return da < db ? -1 : 1;
   return cmpName(a, b);
@@ -28,9 +28,9 @@ function cmpAmount(a, b) {
   const aa = a.scholarship.amount_bdt;
   const ab = b.scholarship.amount_bdt;
   if (aa === null && ab === null) return cmpName(a, b);
-  if (aa === null) return 1; // missing amounts last
+  if (aa === null) return 1;
   if (ab === null) return -1;
-  if (aa !== ab) return ab - aa; // descending
+  if (aa !== ab) return ab - aa;
   return cmpName(a, b);
 }
 
@@ -38,7 +38,7 @@ function sortResults(results, sortBy) {
   const sorted = [...results];
   if (sortBy === "amount") sorted.sort(cmpAmount);
   else if (sortBy === "name") sorted.sort(cmpName);
-  else sorted.sort(cmpDeadline); // deadline default, missing last
+  else sorted.sort(cmpDeadline);
   return sorted;
 }
 
@@ -60,13 +60,14 @@ router.post("/api/match", async (req, res, next) => {
       } else if (result.status === "NOT_ELIGIBLE") {
         const near = asNearMatch(result);
         if (near !== null) nearMatches.push(near);
-        // remaining NOT_ELIGIBLE records are simply not shown
       }
     }
 
+    // Bulk results use grounded templates so response time does not depend
+    // on one Gemini network request per scholarship. Detail pages retain AI.
     for (const group of [eligible, nearMatches, needsReview]) {
       for (const result of group) {
-        result.explanation = await explanationService.explain(
+        result.explanation = explanationService.templateExplanation(
           profile,
           result.scholarship,
           result.checks,
