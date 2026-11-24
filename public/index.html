@@ -23,15 +23,38 @@
 <main class="container">
   <!-- ============ FINDER VIEW ============ -->
   <section id="finderView">
-    <div class="card intro-card">
-      <h2 data-i18n="introTitle">Stop missing scholarships</h2>
-      <p data-i18n="introText">Enter your CGPA, department and whether you need financial support. We check every scholarship in the provided list with deterministic rules, and AI explains why each match fits you. Eligibility is always decided by code — never by AI.</p>
+    <div class="hero-card">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> YOUR NEXT CHAPTER STARTS HERE</span>
+        <h2 data-i18n="introTitle">Stop missing scholarships</h2>
+        <p>Big dreams deserve real opportunities. Tell us a little about yourself and discover scholarships that fit your journey.</p>
+        <div class="hero-points">
+          <span>✦ Smart matching</span><span>✦ Clear eligibility</span><span>✦ AI-powered guidance</span>
+        </div>
+        <a class="hero-jump" href="#profileForm">Find my opportunities <span>↓</span></a>
+      </div>
+      <div class="hero-visual">
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=85" alt="University students studying together on campus" loading="eager">
+        <div class="floating-note note-top"><span>🎓</span><div><strong>Your future</strong><small>One match away</small></div></div>
+        <div class="floating-note note-bottom"><span>✨</span><div><strong>Made for you</strong><small>Personalized matches</small></div></div>
+      </div>
+    </div>
+    <div class="trust-strip">
+      <div><strong>136+</strong><span>Scholarship records</span></div>
+      <div><strong>01</strong><span>Simple profile</span></div>
+      <div><strong>∞</strong><span>Possibilities ahead</span></div>
     </div>
 
-    <form id="profileForm" class="card" novalidate>
+    <form id="profileForm" class="card profile-card" novalidate>
+      <div class="form-heading">
+        <div><span class="form-kicker">LET'S GET TO KNOW YOU</span><h3>Build your student profile</h3><p>A few quick details help us find your best-fit opportunities.</p></div>
+        <div class="profile-icon" aria-hidden="true">✍️</div>
+      </div>
+      <div class="profile-progress"><div class="progress-copy"><span>Profile completion</span><strong id="profileProgressText">0%</strong></div><div class="progress-track"><span id="profileProgressBar"></span></div></div>
       <div class="field">
         <label for="cgpa" data-i18n="cgpaLabel">CGPA (out of 4.00)</label>
-        <input type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="4" inputmode="decimal" placeholder="3.68" required>
+        <input type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="4" inputmode="decimal" placeholder="e.g. 3.68" required>
+        <div class="quick-values"><span>Try:</span><button type="button" data-cgpa="3.50">3.50</button><button type="button" data-cgpa="3.75">3.75</button><button type="button" data-cgpa="4.00">4.00</button></div>
         <p class="field-error" id="cgpaError" hidden></p>
       </div>
 
@@ -61,7 +84,7 @@
         </select>
       </div>
 
-      <button id="submitBtn" class="btn btn-primary btn-block" type="submit" data-i18n="findBtn">Find Scholarships</button>
+      <div class="form-submit-wrap"><p class="privacy-note">🔒 Your profile is only used to calculate scholarship matches.</p><button id="submitBtn" class="btn btn-primary btn-block" type="submit" data-i18n="findBtn">Find Scholarships <span aria-hidden="true">→</span></button></div>
       <p class="form-error" id="formError" hidden></p>
       <p class="dataset-note" id="datasetNote"></p>
     </form>
