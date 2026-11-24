@@ -201,12 +201,12 @@ function cardHtml(r) {
       · ${escapeHtml(t("deadlineLabel"))}: ${escapeHtml(r.deadline || t("notProvided"))}
       · ${escapeHtml(t("minCgpaLabel"))}: ${r.minimum_cgpa != null ? r.minimum_cgpa.toFixed(2) : escapeHtml(t("notProvided"))}</p>
     ${missing ? `<p class="missing-list">${escapeHtml(t("missingLabel"))}</p><ul class="missing-list">${missing}</ul>` : ""}
-    <div class="ai-box">
+    <div class="ai-box" id="cardAi-${escapeHtml(r.scholarship_id)}">
       <span class="ai-label">${escapeHtml(t("aiWhy"))} · ${escapeHtml(ex.source === "gemini" ? "AI" : "Template")}</span>
       <p>${escapeHtml(ex.summary || "")}</p>
       ${passed ? `<ul>${passed}</ul>` : ""}
     </div>
-    <p><button class="btn btn-secondary" type="button" data-detail="${escapeHtml(r.scholarship_id)}">${escapeHtml(t("viewDetails"))}</button></p>
+    <p class="card-actions"><button class="btn btn-secondary" type="button" data-detail="${escapeHtml(r.scholarship_id)}">${escapeHtml(t("viewDetails"))}</button><button class="btn btn-ai" type="button" data-ai-explain="${escapeHtml(r.scholarship_id)}">✦ Explain with AI</button></p>
   </article>`;
 }
 
@@ -228,6 +228,32 @@ function renderResults() {
   document.querySelectorAll("[data-detail]").forEach((btn) => {
     btn.addEventListener("click", () => openDetail(btn.dataset.detail));
   });
+  document.querySelectorAll("[data-ai-explain]").forEach((btn) => {
+    btn.addEventListener("click", () => explainCardWithAI(btn.dataset.aiExplain, btn));
+  });
+}
+
+
+async function explainCardWithAI(id, button) {
+  const box = $("cardAi-" + id);
+  button.disabled = true;
+  button.textContent = "✦ Asking Gemini…";
+  box.innerHTML = '<span class="ai-label">AI EXPLANATION</span><p>Generating a grounded explanation from your verified eligibility checks…</p>';
+  try {
+    const p = currentProfile;
+    const q = new URLSearchParams({cgpa:p.cgpa,department:p.department,financial_support_needed:p.financial_support_needed,gender:p.gender,lang,explain:"ai"});
+    const res = await fetch("/api/scholarships/" + encodeURIComponent(id) + "?" + q);
+    if (!res.ok) throw new Error("AI request failed");
+    const data = await res.json();
+    const ex = data.ai_explanation || {};
+    const label = ex.source === "gemini" ? "✦ GEMINI AI" : "TEMPLATE FALLBACK";
+    const reason = ex.fallback_reason ? '<p class="ai-fallback-note">' + escapeHtml(ex.fallback_reason) + '</p>' : "";
+    box.innerHTML = '<span class="ai-label">' + label + '</span><p>' + escapeHtml(ex.summary || "") + '</p><p><em>' + escapeHtml(ex.disclaimer || "") + '</em></p>' + reason;
+    button.textContent = ex.source === "gemini" ? "✓ AI explanation ready" : "↻ Try AI again";
+  } catch (err) {
+    box.innerHTML = '<span class="ai-label">AI UNAVAILABLE</span><p>Gemini could not generate an explanation right now. Please try again.</p>';
+    button.textContent = "↻ Try AI again";
+  } finally { button.disabled = false; }
 }
 
 /* ---------------- detail ---------------- */
@@ -449,6 +475,17 @@ document.addEventListener("keydown",(event)=>{
   if(event.key==="Escape" && !$("tutorialOverlay").hidden) closeTutorial();
 });
 
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const light = theme === "light";
+  $("themeToggle").textContent = light ? "🌙 Dark" : "☀️ Light";
+  $("themeToggle").setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
+  localStorage.setItem("scholarsync-theme", theme);
+}
+applyTheme(localStorage.getItem("scholarsync-theme") || "dark");
+$("themeToggle").addEventListener("click", () => {
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
 applyI18n();
 loadMeta();
 updateProfileProgress();
