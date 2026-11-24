@@ -36,6 +36,8 @@ const DATA_FILE = process.env.SCHOLARSHIPS_CSV
 
 const settings = {
   DATA_FILE,
+  OPENROUTER_API_KEY: (process.env.OPENROUTER_API_KEY || "").trim(),
+  OPENROUTER_MODEL: (process.env.OPENROUTER_MODEL || "openrouter/free").trim() || "openrouter/free",
   GEMINI_API_KEY: (process.env.GEMINI_API_KEY || "").trim(),
   GEMINI_MODEL:
     (process.env.GEMINI_MODEL || "gemini-3.8-flash").trim() || "gemini-3.8-flash",
