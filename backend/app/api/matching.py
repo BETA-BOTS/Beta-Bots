@@ -28,7 +28,7 @@ def sort_results(results: list, sort_by: str) -> list:
         return sorted(results, key=_sort_key_amount)
     if sort_by == "name":
         return sorted(results, key=lambda r: r.scholarship.name.casefold())
-    return sorted(results, key=_sort_key_deadline)  # deadline default, missing last
+    return sorted(results, key=_sort_key_deadline)
 
 
 @router.post("/api/match")
@@ -47,11 +47,11 @@ def match(payload: MatchRequest, request: Request):
             near = as_near_match(result)
             if near is not None:
                 near_matches.append(near)
-            # remaining NOT_ELIGIBLE records are simply not shown
 
+    # Bulk results use grounded templates; only detail pages call Gemini.
     for group in (eligible, near_matches, needs_review):
         for result in group:
-            result.explanation = explanation_service.explain(
+            result.explanation = explanation_service.template_explanation(
                 profile, result.scholarship, result.checks,
                 result.status, result.missing, profile.lang,
             )
