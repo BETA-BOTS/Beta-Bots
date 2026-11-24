@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScholarSync AI — Scholarship Finder</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">🎓</span>
+      <div>
+        <h1>ScholarSync AI</h1>
+        <p data-i18n="tagline">Find scholarships that match your profile</p>
+      </div>
+    </div>
+    <button id="langToggle" class="btn btn-ghost" type="button">বাংলা</button>
+  </div>
+</header>
+
+<main class="container">
+  <!-- ============ FINDER VIEW ============ -->
+  <section id="finderView">
+    <div class="card intro-card">
+      <h2 data-i18n="introTitle">Stop missing scholarships</h2>
+      <p data-i18n="introText">Enter your CGPA, department and whether you need financial support. We check every scholarship in the provided list with deterministic rules, and AI explains why each match fits you. Eligibility is always decided by code — never by AI.</p>
+    </div>
+
+    <form id="profileForm" class="card" novalidate>
+      <div class="field">
+        <label for="cgpa" data-i18n="cgpaLabel">CGPA (out of 4.00)</label>
+        <input type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="4" inputmode="decimal" placeholder="3.68" required>
+        <p class="field-error" id="cgpaError" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="department" data-i18n="deptLabel">Department</label>
+        <select id="department" name="department" required>
+          <option value="" data-i18n="deptPlaceholder">Select your department</option>
+        </select>
+        <p class="field-error" id="deptError" hidden></p>
+      </div>
+
+      <div class="field">
+        <span class="field-label" data-i18n="needLabel">Do you need financial support?</span>
+        <div class="segmented" role="radiogroup" aria-label="Financial support needed">
+          <label><input type="radio" name="need" value="yes"><span data-i18n="yes">Yes</span></label>
+          <label><input type="radio" name="need" value="no"><span data-i18n="no">No</span></label>
+        </div>
+        <p class="field-error" id="needError" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="gender" data-i18n="genderLabel">Gender (some scholarships are gender-specific)</label>
+        <select id="gender" name="gender">
+          <option value="unspecified" data-i18n="genderUnspec">Prefer not to say</option>
+          <option value="female" data-i18n="genderFemale">Female</option>
+          <option value="male" data-i18n="genderMale">Male</option>
+        </select>
+      </div>
+
+      <button id="submitBtn" class="btn btn-primary btn-block" type="submit" data-i18n="findBtn">Find Scholarships</button>
+      <p class="form-error" id="formError" hidden></p>
+      <p class="dataset-note" id="datasetNote"></p>
+    </form>
+  </section>
+
+  <!-- ============ RESULTS VIEW ============ -->
+  <section id="resultsView" hidden>
+    <button class="btn btn-ghost back-btn" id="backToFinder" type="button">← <span data-i18n="newSearch">New search</span></button>
+
+    <div class="card summary-card">
+      <h2 data-i18n="resultsTitle">Your matches</h2>
+      <p id="profileSummary" class="profile-summary"></p>
+      <div class="counts">
+        <div class="count-box"><span class="count-num" id="countEligible">0</span><span data-i18n="countEligible">Eligible</span></div>
+        <div class="count-box"><span class="count-num" id="countNear">0</span><span data-i18n="countNear">Near matches</span></div>
+        <div class="count-box"><span class="count-num" id="countReview">0</span><span data-i18n="countReview">Needs review</span></div>
+        <div class="count-box"><span class="count-num" id="countChecked">0</span><span data-i18n="countChecked">Records checked</span></div>
+      </div>
+      <div class="results-controls">
+        <label for="sortBy" data-i18n="sortLabel">Sort by</label>
+        <select id="sortBy">
+          <option value="deadline" data-i18n="sortDeadline">Deadline (soonest first)</option>
+          <option value="amount" data-i18n="sortAmount">Amount (highest first)</option>
+          <option value="name" data-i18n="sortName">Name (A–Z)</option>
+        </select>
+        <button id="downloadBtn" class="btn btn-secondary" type="button" data-i18n="downloadBtn">Download results (CSV)</button>
+      </div>
+    </div>
+
+    <h3 class="section-title" data-i18n="eligibleTitle">Eligible scholarships</h3>
+    <div id="eligibleList" class="card-list"></div>
+    <div id="emptyState" class="card empty-state" hidden>
+      <p data-i18n="emptyText">No matching scholarships found in the provided list.</p>
+    </div>
+
+    <h3 class="section-title" data-i18n="nearTitle">Near matches — almost there</h3>
+    <p class="section-sub" data-i18n="nearSub">You meet every requirement except a measurable one listed on each card.</p>
+    <div id="nearList" class="card-list"></div>
+
+    <h3 class="section-title" data-i18n="reviewTitle">Needs review</h3>
+    <p class="section-sub" data-i18n="reviewSub">A requirement could not be verified from the supplied data, so these are neither confirmed nor rejected.</p>
+    <div id="reviewList" class="card-list"></div>
+
+    <p class="dataset-note" data-i18n="resultsNote">Results are based on the provided scholarship list. Please verify official details with the provider before applying.</p>
+  </section>
+
+  <!-- ============ DETAIL VIEW ============ -->
+  <section id="detailView" hidden>
+    <button class="btn btn-ghost back-btn" id="backToResults" type="button">← <span data-i18n="backResults">Back to results</span></button>
+    <div id="detailContent"></div>
+  </section>
+
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="spinner" aria-hidden="true"></div>
+    <p data-i18n="loading">Checking every scholarship…</p>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <p data-i18n="footer">ScholarSync AI · Track 3 — Personalized Learning &amp; Productivity · Dataset provided by the hackathon organizers.</p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
