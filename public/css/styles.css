@@ -380,3 +380,10 @@ html[data-theme="light"] .btn-ai{color:#4E48B8;background:#F0F0FF;border-color:#
 .quick-values button{transition:transform .15s,background .15s,border-color .15s}
 .quick-values button:hover{transform:translateY(-2px) scale(1.04)}
 @media(max-width:520px){.header-actions{gap:5px}.header-actions .btn{padding:8px 9px;font-size:11px}.card-actions .btn{flex:1}}
+
+.btn-download-one{color:#DDFBFF;background:linear-gradient(120deg,#245B68,#263D69);border:1px solid #4C8998}
+.btn-download-one:hover{box-shadow:0 8px 22px rgba(85,214,232,.22)}
+.detail-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.detail-title-row h2{margin-bottom:0}
+html[data-theme="light"] .btn-download-one{color:#24556A;background:linear-gradient(120deg,#E2F8FC,#E9E8FF);border-color:#B8DCE5}
+@media(max-width:520px){.detail-title-row .btn{width:100%}}
