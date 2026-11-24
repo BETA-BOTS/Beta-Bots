@@ -146,17 +146,24 @@ async function geminiExplanation(profile, scholarship, checks, status, lang) {
     `${settings.GEMINI_MODEL}:generateContent`;
   // Keep detail pages responsive: make one bounded request. If Gemini is
   // temporarily unavailable, return the grounded template immediately.
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "x-goog-api-key": settings.GEMINI_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!response.ok) {
+  let response;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": settings.GEMINI_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (response.ok) break;
     const detail = await response.text().catch(() => "");
+    const retryable = [429, 500, 502, 503, 504].includes(response.status);
+    if (attempt === 0 && retryable) {
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      continue;
+    }
     throw new Error(
       `Gemini request failed with HTTP ${response.status}` +
       (detail ? `: ${detail.slice(0, 300)}` : "")
@@ -181,16 +188,23 @@ async function explain(profile, scholarship, checks, status, missing = [], lang 
   const key = profileKey(profile, scholarship, status, lang);
   if (cache.has(key)) return cache.get(key);
   let result = null;
+  let fallbackReason = settings.GEMINI_API_KEY
+    ? null
+    : "GEMINI_API_KEY is missing in the local .env file.";
   if (settings.GEMINI_API_KEY) {
     try {
       result = await geminiExplanation(profile, scholarship, checks, status, lang);
     } catch (exc) {
       // timeout, HTTP error, malformed JSON...
+      fallbackReason = exc.message;
       console.warn(`Gemini explanation failed, using template: ${exc.message}`);
     }
   }
   if (result === null) {
     result = templateExplanation(profile, scholarship, checks, status, missing, lang);
+  }
+  if (result.source === "template" && fallbackReason) {
+    result.fallback_reason = fallbackReason;
   }
   // Cache successful Gemini explanations only. A temporary API outage
   // must not permanently pin this profile to a template response.
