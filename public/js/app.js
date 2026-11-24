@@ -206,7 +206,7 @@ function cardHtml(r) {
       <p>${escapeHtml(ex.summary || "")}</p>
       ${passed ? `<ul>${passed}</ul>` : ""}
     </div>
-    <p class="card-actions"><button class="btn btn-secondary" type="button" data-detail="${escapeHtml(r.scholarship_id)}">${escapeHtml(t("viewDetails"))}</button><button class="btn btn-ai" type="button" data-ai-explain="${escapeHtml(r.scholarship_id)}">✦ Explain with AI</button></p>
+    <p class="card-actions"><button class="btn btn-secondary" type="button" data-detail="${escapeHtml(r.scholarship_id)}">${escapeHtml(t("viewDetails"))}</button><button class="btn btn-ai" type="button" data-ai-explain="${escapeHtml(r.scholarship_id)}">✦ Explain with AI</button><button class="btn btn-download-one" type="button" data-download-scholarship="${escapeHtml(r.scholarship_id)}">↓ Download</button></p>
   </article>`;
 }
 
@@ -230,6 +230,9 @@ function renderResults() {
   });
   document.querySelectorAll("[data-ai-explain]").forEach((btn) => {
     btn.addEventListener("click", () => explainCardWithAI(btn.dataset.aiExplain, btn));
+  });
+  document.querySelectorAll("[data-download-scholarship]").forEach((btn) => {
+    btn.addEventListener("click", () => downloadOneScholarship(btn.dataset.downloadScholarship, btn));
   });
 }
 
@@ -318,7 +321,7 @@ function renderDetail(d) {
   const clDocs = (cl.documents || []).map((s) => `<li>${escapeHtml(s)}</li>`).join("");
   $("detailContent").innerHTML = `
   <div class="card">
-    <h2 style="margin-top:0;color:var(--green-900)">${escapeHtml(d.name)}</h2>
+    <div class="detail-title-row"><h2 style="margin-top:0;color:var(--green-900)">${escapeHtml(d.name)}</h2><button class="btn btn-download-one" type="button" data-download-detail="${escapeHtml(d.scholarship_id || d.id || "")}">↓ Download this scholarship</button></div>
     <dl class="detail-fields">
       <dt>${escapeHtml(t("providerLabel"))}</dt><dd>${escapeHtml(val(d.provider))}</dd>
       <dt>${escapeHtml(t("amountLabel"))}</dt><dd>${escapeHtml(val(d.amount_display))}</dd>
@@ -342,6 +345,58 @@ function renderDetail(d) {
     ${clSteps ? `<ul class="checklist">${clSteps}</ul>` : ""}
     ${clDocs ? `<ul class="checklist">${clDocs}</ul>` : ""}
   </div>`;
+}
+
+
+async function downloadOneScholarship(id, button) {
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "Preparing file…";
+  try {
+    const p = currentProfile;
+    const q = new URLSearchParams({
+      cgpa:p.cgpa, department:p.department,
+      financial_support_needed:p.financial_support_needed,
+      gender:p.gender, lang
+    });
+    const response = await fetch("/api/scholarships/" + encodeURIComponent(id) + "?" + q);
+    if (!response.ok) throw new Error("Could not load scholarship details");
+    const d = await response.json();
+    const rows = [
+      ["Scholarship", d.name],
+      ["Scholarship ID", d.scholarship_id || d.id || id],
+      ["Provider", d.provider],
+      ["Amount", d.amount_display],
+      ["Deadline", d.deadline],
+      ["Minimum CGPA", d.minimum_cgpa],
+      ["Eligible departments", d.all_departments ? "All" : (d.eligible_departments || []).join("; ")],
+      ["Description", d.description],
+      ["Your eligibility status", d.status],
+      ["Dataset note", d.dataset_note],
+      ["Eligibility checks", (d.checks || []).map(c => c.criterion + ": " + c.status + " — " + c.detail).join(" | ")],
+      ["Application checklist", (d.application_checklist?.steps || []).join(" | ")],
+      ["Suggested documents", (d.application_checklist?.documents || []).join(" | ")],
+      ["AI explanation", d.ai_explanation?.summary || ""],
+      ["AI source", d.ai_explanation?.source || "Not requested"]
+    ];
+    const csv = "\uFEFF" + ["Field,Value", ...rows.map(row => row.map(value => '"' + String(value ?? "").replace(/"/g,'""') + '"').join(","))].join("\r\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (String(d.name || "scholarship").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").toLowerCase() || "scholarship") + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    button.textContent = "✓ Downloaded";
+  } catch (error) {
+    alert("Could not download this scholarship. Please try again.");
+    button.textContent = original;
+  } finally {
+    button.disabled = false;
+    setTimeout(() => { if (button.isConnected) button.textContent = original; }, 1800);
+  }
 }
 
 /* ---------------- download ---------------- */
@@ -387,6 +442,10 @@ $("profileForm").addEventListener("submit", (ev) => {
 
 $("sortBy").addEventListener("change", () => { if (currentProfile) runMatch(); });
 $("downloadBtn").addEventListener("click", downloadResults);
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-download-detail]");
+  if (button) downloadOneScholarship(button.dataset.downloadDetail, button);
+});
 $("backToFinder").addEventListener("click", () => showView("finder"));
 $("backToResults").addEventListener("click", () => showView("results"));
 $("langToggle").addEventListener("click", () => {
