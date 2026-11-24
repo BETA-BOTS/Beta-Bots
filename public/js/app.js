@@ -396,6 +396,59 @@ document.querySelectorAll("[data-cgpa]").forEach((button) => {
   });
 });
 
+
+/* ---------------- in-app tutorial ---------------- */
+const tutorialCopy = {
+  en: {
+    kicker:"QUICK START GUIDE", title:"How to use ScholarSync AI",
+    steps:[
+      ["Enter your CGPA","Type your CGPA out of 4.00. You can also use one of the quick-select buttons."],
+      ["Select your department","Choose the department that matches your current study program."],
+      ["Answer the profile questions","Tell us whether you need financial support. Gender is optional and can be left unspecified."],
+      ["Explore your matches","We check every record in the supplied dataset. Open details to review eligibility checks, deadlines and application guidance."]
+    ],
+    note:"Eligibility is decided by verified rules—not by AI. AI only helps explain your results.",
+    done:"Got it — let's start", close:"Close tutorial"
+  },
+  bn: {
+    kicker:"দ্রুত ব্যবহার নির্দেশিকা", title:"ScholarSync AI কীভাবে ব্যবহার করবেন",
+    steps:[
+      ["CGPA লিখুন","৪.০০-এর মধ্যে আপনার CGPA লিখুন। চাইলে নিচের quick-select বাটনও ব্যবহার করতে পারেন।"],
+      ["বিভাগ নির্বাচন করুন","আপনার বর্তমান পড়াশোনার বিভাগের সাথে মেলে এমন বিভাগ বেছে নিন।"],
+      ["প্রোফাইলের প্রশ্নগুলোর উত্তর দিন","আপনার আর্থিক সহায়তা প্রয়োজন কি না জানান। Gender-এর তথ্য ঐচ্ছিক।"],
+      ["ম্যাচগুলো দেখুন","আমরা দেওয়া ডেটাসেটের প্রতিটি রেকর্ড যাচাই করি। বিস্তারিত খুলে যোগ্যতার শর্ত, deadline ও আবেদনের নির্দেশনা দেখুন।"]
+    ],
+    note:"যোগ্যতা নির্ধারণ করে নির্দিষ্ট নিয়ম—AI নয়। AI শুধু ফলাফল বুঝতে সাহায্য করে।",
+    done:"বুঝেছি — শুরু করি", close:"টিউটোরিয়াল বন্ধ করুন"
+  }
+};
+function updateTutorialLanguage(){
+  const c=tutorialCopy[lang];
+  $("tutorialTitle").textContent=c.title;
+  document.querySelector(".tutorial-kicker").textContent=c.kicker;
+  document.querySelectorAll(".tutorial-step").forEach((step,i)=>{
+    step.querySelector("h3").textContent=c.steps[i][0];
+    step.querySelector("p").textContent=c.steps[i][1];
+  });
+  $("tutorialOverlay").querySelector(".tutorial-note").textContent=c.note;
+  $("tutorialGotIt").textContent=c.done;
+  $("tutorialClose").setAttribute("aria-label",c.close);
+}
+function closeTutorial(){ $("tutorialOverlay").hidden=true; $("tutorialBtn").focus(); }
+$("tutorialBtn").addEventListener("click",()=>{
+  updateTutorialLanguage();
+  $("tutorialOverlay").hidden=false;
+  $("tutorialClose").focus();
+});
+$("tutorialClose").addEventListener("click",closeTutorial);
+$("tutorialGotIt").addEventListener("click",closeTutorial);
+$("tutorialOverlay").addEventListener("click",(event)=>{
+  if(event.target===$("tutorialOverlay")) closeTutorial();
+});
+document.addEventListener("keydown",(event)=>{
+  if(event.key==="Escape" && !$("tutorialOverlay").hidden) closeTutorial();
+});
+
 applyI18n();
 loadMeta();
 updateProfileProgress();
