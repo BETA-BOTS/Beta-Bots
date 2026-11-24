@@ -369,5 +369,33 @@ $("langToggle").addEventListener("click", () => {
   if (currentResults && currentProfile) runMatch($("sortBy").value);
 });
 
+// Small live interactions on the landing page.
+function updateProfileProgress() {
+  const filled = [
+    Boolean($("cgpa").value),
+    Boolean($("department").value),
+    Boolean(document.querySelector('input[name="need"]:checked')),
+    $("gender").value !== "unspecified",
+  ].filter(Boolean).length;
+  const percent = Math.round((filled / 4) * 100);
+  $("profileProgressText").textContent = percent + "%";
+  $("profileProgressBar").style.width = percent + "%";
+}
+["cgpa", "department", "gender"].forEach((id) => {
+  $(id).addEventListener("input", updateProfileProgress);
+  $(id).addEventListener("change", updateProfileProgress);
+});
+document.querySelectorAll('input[name="need"]').forEach((el) =>
+  el.addEventListener("change", updateProfileProgress)
+);
+document.querySelectorAll("[data-cgpa]").forEach((button) => {
+  button.addEventListener("click", () => {
+    $("cgpa").value = button.dataset.cgpa;
+    updateProfileProgress();
+    $("cgpa").focus();
+  });
+});
+
 applyI18n();
 loadMeta();
+updateProfileProgress();
