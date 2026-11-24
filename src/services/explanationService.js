@@ -183,21 +183,84 @@ async function geminiExplanation(profile, scholarship, checks, status, lang) {
   };
 }
 
+
+/* --------------------------- OpenRouter ------------------------------ */
+async function openRouterExplanation(profile, scholarship, checks, status, lang) {
+  const checksPayload = checks.map((c) => ({
+    criterion: c.criterion, status: c.status, detail: c.detail,
+  }));
+  const userPayload = {
+    student_profile: {
+      cgpa: profile.cgpa, department: profile.department,
+      financial_support_needed: profile.financial_support_needed,
+      gender: profile.gender,
+    },
+    scholarship_record: publicDict(scholarship),
+    verified_checks: checksPayload,
+    eligibility_status_decided_by_code: status,
+    language: lang === "bn" ? "Bangla (bn)" : "English (en)",
+    task: "Explain the verified scholarship match in 1-3 concise sentences. List passed and failed/unknown criteria.",
+  };
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${settings.OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "X-Title": "ScholarSync AI",
+    },
+    body: JSON.stringify({
+      model: settings.OPENROUTER_MODEL,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: JSON.stringify(userPayload) },
+      ],
+      temperature: 0.2,
+      max_tokens: 512,
+    }),
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(`OpenRouter request failed with HTTP ${response.status}` +
+      (detail ? `: ${detail.slice(0, 250)}` : ""));
+  }
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("OpenRouter returned an empty response.");
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  const parsed = JSON.parse(cleaned);
+  return {
+    summary: String(parsed.summary || ""),
+    passed_reasons: (parsed.passed_reasons || []).map(String),
+    missing_or_failed: (parsed.missing_or_failed || []).map(String),
+    disclaimer: String(parsed.disclaimer || (lang === "bn" ? DISCLAIMER_BN : DISCLAIMER_EN)),
+    source: "openrouter",
+  };
+}
+
 async function explain(profile, scholarship, checks, status, missing = [], lang = "en") {
   /* Return a grounded explanation dict; never throws. */
   const key = profileKey(profile, scholarship, status, lang);
   if (cache.has(key)) return cache.get(key);
   let result = null;
-  let fallbackReason = settings.GEMINI_API_KEY
-    ? null
-    : "GEMINI_API_KEY is missing in the local .env file.";
-  if (settings.GEMINI_API_KEY) {
+  let fallbackReason = null;
+  // OpenRouter is the primary provider. Gemini remains an optional backup.
+  if (settings.OPENROUTER_API_KEY) {
+    try {
+      result = await openRouterExplanation(profile, scholarship, checks, status, lang);
+    } catch (exc) {
+      fallbackReason = exc.message;
+      console.warn(`OpenRouter explanation failed: ${exc.message}`);
+    }
+  } else {
+    fallbackReason = "OPENROUTER_API_KEY is missing in the local .env file.";
+  }
+  if (result === null && settings.GEMINI_API_KEY) {
     try {
       result = await geminiExplanation(profile, scholarship, checks, status, lang);
     } catch (exc) {
-      // timeout, HTTP error, malformed JSON...
-      fallbackReason = exc.message;
-      console.warn(`Gemini explanation failed, using template: ${exc.message}`);
+      fallbackReason = [fallbackReason, exc.message].filter(Boolean).join(" | ");
+      console.warn(`Gemini backup failed: ${exc.message}`);
     }
   }
   if (result === null) {
