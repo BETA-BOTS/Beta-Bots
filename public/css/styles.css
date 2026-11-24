@@ -323,3 +323,60 @@ table.checks th{background:#1C2742}table.checks th,table.checks td{border-color:
 .tutorial-steps{display:grid;gap:10px}.tutorial-step{display:flex;gap:14px;padding:14px;border-radius:13px}.tutorial-step>span{flex:0 0 34px;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(85,214,232,.12);color:#55D6E8;font-size:12px;font-weight:850}
 .tutorial-step h3{margin:0 0 3px;font-size:14px}.tutorial-step p{margin:0;font-size:12px;line-height:1.6}.tutorial-note{margin:17px 0;padding:12px 14px;border-left:3px solid #55D6E8;background:#111A2D;border-radius:0 10px 10px 0;font-size:12px;color:#C8D4EF}
 @media(max-width:520px){.header-actions{gap:6px}.header-actions .btn{padding:8px 10px;font-size:12px}}
+
+/* Light mode */
+html[data-theme="light"]{color-scheme:light}
+html[data-theme="light"] body{color:#17233D;background:radial-gradient(ellipse at 12% 0%,rgba(117,104,246,.10),transparent 36rem),#F5F7FF}
+html[data-theme="light"] .app-header{background:rgba(247,249,255,.95);border-bottom:1px solid #E0E6F3}
+html[data-theme="light"] .brand h1{color:#17233D}html[data-theme="light"] .brand p{color:#68758F}
+html[data-theme="light"] .brand-mark{background:#E9EAFE}
+html[data-theme="light"] .app-header .btn-ghost{color:#263454;background:#EEF0FF;border-color:#D9DEF4}
+html[data-theme="light"] .hero-card{background:linear-gradient(125deg,#E9ECFF,#DFF8FC 70%,#F3F5FF);color:#17233D}
+html[data-theme="light"] .hero-copy h2{color:#17233D}html[data-theme="light"] .hero-copy>p{color:#52617D}
+html[data-theme="light"] .hero-copy .eyebrow{color:#5552B8}html[data-theme="light"] .hero-points span{color:#313A69;border-color:#C8CFF0;background:rgba(255,255,255,.55)}
+html[data-theme="light"] .hero-jump{background:#7568F6;color:#fff}
+html[data-theme="light"] .floating-note{background:rgba(255,255,255,.95);color:#17233D;border-color:#DCE3F2}html[data-theme="light"] .floating-note small{color:#68758F}
+html[data-theme="light"] .trust-strip>div,html[data-theme="light"] .card,html[data-theme="light"] .sch-card{background:#fff;border-color:#E1E6F2;box-shadow:0 12px 30px rgba(33,47,86,.07)}
+html[data-theme="light"] .trust-strip strong,html[data-theme="light"] .form-heading h3,html[data-theme="light"] .summary-card h2,html[data-theme="light"] .section-title,html[data-theme="light"] .sch-card h4,html[data-theme="light"] #detailContent h3{color:#17233D}
+html[data-theme="light"] .trust-strip span,html[data-theme="light"] .form-heading p,html[data-theme="light"] .profile-summary,html[data-theme="light"] .section-sub,html[data-theme="light"] .dataset-note,html[data-theme="light"] .app-footer{color:#68758F}
+html[data-theme="light"] .profile-icon{background:#EEF0FF}html[data-theme="light"] .profile-progress{background:#F7F8FF;border-color:#E1E6F2}
+html[data-theme="light"] .progress-copy{color:#68758F}html[data-theme="light"] .progress-copy strong{color:#6157D9}html[data-theme="light"] .progress-track{background:#E4E8F4}
+html[data-theme="light"] .field label,html[data-theme="light"] .field-label,html[data-theme="light"] .results-controls label,html[data-theme="light"] .detail-fields dt,html[data-theme="light"] table.checks th{color:#273654}
+html[data-theme="light"] .field input[type=number],html[data-theme="light"] .field select,html[data-theme="light"] .results-controls select{color:#17233D;background:#fff;border-color:#D9E0EF}
+html[data-theme="light"] .field input::placeholder{color:#98A3B8}
+html[data-theme="light"] .segmented span{color:#68758F;background:#fff;border-color:#D9E0EF}
+html[data-theme="light"] .segmented input:checked+span{color:#443DB2;background:#EEF0FF;border-color:#7568F6}
+html[data-theme="light"] .btn-primary{color:#fff;background:linear-gradient(135deg,#6559E8,#319DBA)}
+html[data-theme="light"] .btn-secondary{color:#39358E;background:#EEF0FF;border-color:#D9DEF4}
+html[data-theme="light"] .btn-ghost{color:#293755;background:#fff;border-color:#DDE3EF}
+html[data-theme="light"] .count-box{background:linear-gradient(145deg,#F7F8FF,#EDF1FF);border-color:#E0E5F2;color:#68758F}
+html[data-theme="light"] .count-num{color:#4D48B9}html[data-theme="light"] .sch-amount{color:#287F9C}
+html[data-theme="light"] .ai-box{color:#4D5C78;background:#F2F6FF;border-color:#E0E7F5}html[data-theme="light"] .ai-box .ai-label{color:#5550C4}
+html[data-theme="light"] table.checks th{background:#EEF0FF}html[data-theme="light"] table.checks th,html[data-theme="light"] table.checks td{border-color:#DDE3EF}
+html[data-theme="light"] .detail-fields dd,html[data-theme="light"] .checklist li{color:#4D5C78}
+html[data-theme="light"] .loading-overlay{color:#17233D;background:rgba(247,249,255,.94)}html[data-theme="light"] .spinner{border-color:#E1E5F2;border-top-color:#6559E8}
+html[data-theme="light"] .quick-values button{background:#EEF0FF;border-color:#D9DEF4;color:#514AC1}html[data-theme="light"] .privacy-note{color:#68758F}
+html[data-theme="light"] .tutorial-dialog{background:#fff;color:#17233D;border-color:#DDE3EF}
+html[data-theme="light"] .tutorial-dialog h2,html[data-theme="light"] .tutorial-dialog h3{color:#17233D}
+html[data-theme="light"] .tutorial-dialog p,html[data-theme="light"] .tutorial-dialog li{color:#53627D}
+html[data-theme="light"] .tutorial-step{background:#F5F6FF;border-color:#E0E5F2}
+html[data-theme="light"] .tutorial-close{color:#293755;background:#EEF0FF;border-color:#D9DEF4}
+html[data-theme="light"] .tutorial-note{background:#F1F4FF;color:#4D5C78}
+html[data-theme="light"] .btn-ai{color:#4E48B8;background:#F0F0FF;border-color:#D8D8FA}
+/* Interactive controls */
+.header-actions{display:flex;align-items:center;gap:8px}
+.btn{position:relative;overflow:hidden;will-change:transform;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .2s,filter .2s,border-color .2s}
+.btn:hover{transform:translateY(-2px) scale(1.015);filter:brightness(1.06)}
+.btn:active{transform:translateY(1px) scale(.975);filter:brightness(.96)}
+.btn:disabled{opacity:.6;cursor:wait;transform:none}
+.btn-primary:hover{box-shadow:0 12px 28px rgba(85,214,232,.24)}
+.btn-secondary:hover,.btn-ghost:hover{box-shadow:0 7px 18px rgba(85,214,232,.12)}
+.card-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 0!important}
+.btn-ai{color:#DDFBFF;background:linear-gradient(120deg,#39346F,#1C5365);border-color:#53618E}
+.btn-ai:hover{box-shadow:0 8px 22px rgba(85,214,232,.2)}
+.ai-fallback-note{font-size:11px;opacity:.8;border-top:1px solid currentColor;padding-top:7px;overflow-wrap:anywhere}
+.sch-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.sch-card:hover{transform:translateY(-4px)}
+.quick-values button{transition:transform .15s,background .15s,border-color .15s}
+.quick-values button:hover{transform:translateY(-2px) scale(1.04)}
+@media(max-width:520px){.header-actions{gap:5px}.header-actions .btn{padding:8px 9px;font-size:11px}.card-actions .btn{flex:1}}
