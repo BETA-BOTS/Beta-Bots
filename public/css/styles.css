@@ -387,3 +387,27 @@ html[data-theme="light"] .btn-ai{color:#4E48B8;background:#F0F0FF;border-color:#
 .detail-title-row h2{margin-bottom:0}
 html[data-theme="light"] .btn-download-one{color:#24556A;background:linear-gradient(120deg,#E2F8FC,#E9E8FF);border-color:#B8DCE5}
 @media(max-width:520px){.detail-title-row .btn{width:100%}}
+
+/* Strong, accessible contrast for scholarship titles in light mode */
+html[data-theme="light"] .sch-card h4,
+html[data-theme="light"] .sch-card h4 *,
+html[data-theme="light"] #eligibleList .sch-card h4,
+html[data-theme="light"] #nearList .sch-card h4,
+html[data-theme="light"] #reviewList .sch-card h4,
+html[data-theme="light"] .detail-title-row h2,
+html[data-theme="light"] #detailContent .card h2 {
+  color:#17233D !important;
+  opacity:1 !important;
+  -webkit-text-fill-color:#17233D;
+}
+html[data-theme="light"] .sch-card .badge { -webkit-text-fill-color:initial; }
+html[data-theme="light"] .sch-card .sch-meta { color:#53627D; }
+html[data-theme="light"] .sch-card .sch-amount { color:#176B87; }
+
+/* Hero image graceful fallback if the remote image host is unreachable */
+.hero-visual{min-height:275px}
+.hero-visual.image-fallback{display:grid;place-items:center;min-height:275px;border-radius:21px;overflow:hidden;background:radial-gradient(circle at 75% 20%,rgba(85,214,232,.32),transparent 35%),linear-gradient(135deg,#1C2742,#26365A)}
+.hero-visual.image-fallback:after{content:"🎓  Your next opportunity starts here";position:relative;z-index:1;padding:28px;text-align:center;color:#E8EEFF;font-size:clamp(20px,3vw,30px);font-weight:800;line-height:1.3}
+html[data-theme="light"] .hero-visual.image-fallback{background:radial-gradient(circle at 75% 20%,rgba(85,214,232,.28),transparent 35%),linear-gradient(135deg,#E9ECFF,#DFF8FC)}
+html[data-theme="light"] .hero-visual.image-fallback:after{color:#17233D}
+.ai-fallback-note{line-height:1.6;overflow-wrap:anywhere}
